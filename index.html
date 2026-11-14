@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>EDUVERSE — Learn, Connect, Grow</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">E</span><span>EDU<span class="brand-accent">VERSE</span><small>LEARN • CONNECT • GROW</small></span></a>
+    <div id="headerUser" class="header-user hidden"><span id="headerName"></span><button id="logoutBtn" class="button button-quiet">Keluar</button></div>
+  </header>
+
+  <main>
+    <section id="authView" class="auth-layout">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span> RUANG BELAJAR DIGITAL</div>
+        <h1>Belajar lebih jauh.<br><span class="gradient-text">Tumbuh bersama.</span></h1>
+        <p>Tempat belajar, berlatih, dan terhubung dengan teman dalam satu ruang yang positif.</p>
+        <div class="hero-points"><span>✦ Materi SD • SMP • SMA</span><span>✦ Kuis dan progres</span><span>✦ Komunitas belajar</span></div>
+      </div>
+      <div class="auth-card glass">
+        <div class="auth-tabs"><button id="loginTab" class="tab active">Masuk</button><button id="signupTab" class="tab">Daftar</button></div>
+        <h2 id="authTitle">Selamat datang kembali</h2><p id="authSubtitle" class="muted">Masuk untuk melanjutkan perjalanan belajarmu.</p>
+        <form id="authForm">
+          <label id="nameLabel" class="hidden">Nama tampilan<input id="displayName" maxlength="40" autocomplete="nickname" placeholder="Nama panggilan"></label>
+          <label>Email<input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
+          <label>Password<input id="password" type="password" minlength="8" autocomplete="current-password" required placeholder="Minimal 8 karakter"></label>
+          <button id="authSubmit" class="button button-primary full" type="submit">Masuk ke EDUVERSE</button>
+        </form>
+        <p id="authMessage" class="message" role="status"></p>
+        <p class="tiny muted">Gunakan nama panggilan. Jangan cantumkan alamat rumah, nomor telepon, nama sekolah lengkap, atau informasi pribadi di profil.</p>
+      </div>
+    </section>
+
+    <section id="appView" class="app-layout hidden">
+      <aside class="sidebar glass">
+        <div class="side-label">MENU UTAMA</div>
+        <button class="nav-item active" data-page="home"><span>⌂</span> Ringkasan</button>
+        <button class="nav-item" data-page="materials"><span>▤</span> Materi belajar</button>
+        <button class="nav-item" data-page="quiz"><span>✎</span> Kuis latihan</button>
+        <button class="nav-item" data-page="friends"><span>♧</span> Teman</button>
+        <button class="nav-item" data-page="chat"><span>◌</span> Chat</button>
+        <button class="nav-item" data-page="profile"><span>◎</span> Profil</button>
+        <div class="sidebar-note"><b>Belajar dengan aman</b><p>Jaga privasi dan bersikap baik kepada sesama pelajar.</p></div>
+      </aside>
+
+      <div class="content">
+        <section id="page-home" class="page">
+          <div class="welcome-row"><div><div class="eyebrow">DASHBOARD PELAJAR</div><h1>Halo, <span id="welcomeName">Pelajar</span>! <span class="wave">✦</span></h1><p class="muted">Satu langkah kecil hari ini membawa kemajuan.</p></div><div class="date-chip">✧ EDUVERSE</div></div>
+          <div class="stat-grid"><article class="stat-card glass"><span class="stat-icon">▤</span><b>Materi</b><strong>6</strong><small class="muted">Mata pelajaran</small></article><article class="stat-card glass"><span class="stat-icon">✎</span><b>Kuis</b><strong>Siap</strong><small class="muted">Latihan mandiri</small></article><article class="stat-card glass"><span class="stat-icon">♧</span><b>Komunitas</b><strong id="friendCount">0</strong><small class="muted">Teman terhubung</small></article></div>
+          <div class="section-heading"><div><div class="eyebrow">MULAI BELAJAR</div><h2>Pilih perjalananmu</h2></div></div>
+          <div class="level-grid"><button class="level-card" data-level="SD"><span>🌱</span><b>SD</b><small>Bangun fondasi</small></button><button class="level-card" data-level="SMP"><span>🚀</span><b>SMP</b><small>Jelajahi ide</small></button><button class="level-card" data-level="SMA"><span>🌌</span><b>SMA</b><small>Asah potensimu</small></button></div>
+          <div class="section-heading"><div><div class="eyebrow">PILIHAN HARI INI</div><h2>Ruang belajar</h2></div><button class="text-button" data-goto="materials">Lihat semua →</button></div>
+          <div id="homeMaterials" class="material-grid"></div>
+        </section>
+
+        <section id="page-materials" class="page hidden">
+          <div class="eyebrow">PERPUSTAKAAN DIGITAL</div><h1>Materi belajar</h1><p class="muted">Pilih jenjang dan mata pelajaran untuk mulai belajar.</p>
+          <div class="filter-row"><select id="levelFilter"><option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA">SMA</option></select><select id="subjectFilter"><option value="Semua">Semua pelajaran</option><option>Matematika</option><option>IPA</option><option>Bahasa Indonesia</option><option>Bahasa Inggris</option><option>IPS</option><option>Informatika</option></select></div>
+          <div id="materialsList" class="material-grid"></div>
+        </section>
+
+        <section id="page-quiz" class="page hidden">
+          <div class="eyebrow">LATIHAN MANDIRI</div><h1>Kuis singkat</h1><p class="muted">Coba jawab pertanyaan berikut. Ini latihan, bukan penilaian resmi.</p>
+          <div class="quiz-card glass"><span class="tag">MATEMATIKA • SMP</span><h2>Berapakah hasil dari 12 × 8?</h2><div id="quizOptions" class="quiz-options"><button data-answer="96">96</button><button data-answer="86">86</button><button data-answer="108">108</button><button data-answer="92">92</button></div><p id="quizFeedback" class="message"></p><button id="nextQuiz" class="button button-secondary hidden">Coba lagi</button></div>
+        </section>
+
+        <section id="page-friends" class="page hidden">
+          <div class="eyebrow">KOMUNITAS BELAJAR</div><h1>Teman belajar</h1><p class="muted">Cari teman menggunakan username. Jangan mencari atau membagikan data pribadi.</p>
+          <div class="search-row glass"><input id="userSearch" maxlength="24" placeholder="Cari username, contoh: pelajar_ab12"><button id="searchBtn" class="button button-primary">Cari</button></div>
+          <div id="searchResults" class="stack-list"></div>
+          <div class="two-columns"><div><h2>Permintaan masuk</h2><div id="incomingRequests" class="stack-list"></div></div><div><h2>Teman saya</h2><div id="friendsList" class="stack-list"></div></div></div>
+        </section>
+
+        <section id="page-chat" class="page hidden">
+          <div class="eyebrow">RUANG DISKUSI</div><h1>Chat teman</h1><p class="muted">Chat hanya tersedia dengan teman yang sudah menerima permintaan pertemanan.</p>
+          <div class="chat-layout glass"><div id="chatContacts" class="chat-contacts"></div><div class="chat-main"><div id="chatTitle" class="chat-title">Pilih teman untuk memulai chat</div><div id="chatMessages" class="chat-messages"><p class="muted">Pesan akan muncul di sini.</p></div><form id="chatForm" class="chat-compose"><input id="chatInput" maxlength="1000" placeholder="Tulis pesan yang sopan..." disabled><button class="button button-primary" disabled id="sendMessage">Kirim</button></form></div></div>
+        </section>
+
+        <section id="page-profile" class="page hidden">
+          <div class="eyebrow">AKUN PELAJAR</div><h1>Profil saya</h1><div class="profile-card glass"><div class="avatar" id="profileAvatar">P</div><form id="profileForm"><label>Username<input id="profileUsername" disabled></label><label>Nama tampilan<input id="profileDisplay" maxlength="40" required></label><label>Bio singkat<textarea id="profileBio" maxlength="160" rows="3" placeholder="Ceritakan minat belajarmu, tanpa informasi pribadi."></textarea></label><button class="button button-primary" type="submit">Simpan profil</button><p id="profileMessage" class="message"></p></form></div></section>
+      </div>
+    </section>
+  </main>
+  <footer>EDUVERSE <span>•</span> Belajar, terhubung, dan berkembang dengan aman.</footer>
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>
