@@ -19,9 +19,18 @@ function showAuthMessage(msg,error=false){$("authMessage").textContent=msg;$("au
 function setMode(mode){authMode=mode;$("loginTab").classList.toggle("active",mode==="login");$("signupTab").classList.toggle("active",mode==="signup");$("nameLabel").classList.toggle("hidden",mode==="login");$("authTitle").textContent=mode==="login"?"Selamat datang kembali":"Buat akun EDUVERSE";$("authSubtitle").textContent=mode==="login"?"Masuk untuk melanjutkan perjalanan belajarmu.":"Daftar dengan email dan nama panggilan."; $("authSubmit").textContent=mode==="login"?"Masuk ke EDUVERSE":"Buat akun";$("password").autocomplete=mode==="login"?"current-password":"new-password";showAuthMessage("")}
 $("loginTab").onclick=()=>setMode("login");$("signupTab").onclick=()=>setMode("signup");
 $("authForm").addEventListener("submit",async e=>{e.preventDefault();const email=$("email").value.trim(),password=$("password").value,display_name=$("displayName").value.trim();$("authSubmit").disabled=true;showAuthMessage("Memproses...");
- try{if(authMode==="signup"){if(!display_name)throw Error("Isi nama tampilan.");const {data,error}=await db.auth.signUp({email,password,options:{data:{display_name}}});if(error)throw error;if(data.session){toast("Akun berhasil dibuat!")}else{showAuthMessage("Pendaftaran diterima. Periksa email untuk verifikasi, lalu masuk.");$("authSubmit").disabled=false;return}}
- else{const {error}=await db.auth.signInWithPassword({email,password});if(error)throw error}}
- catch(err){showAuthMessage(err.message||"Terjadi kesalahan.",true)}finally{$("authSubmit").disabled=false}});
+ try{
+  if(authMode==="signup"){
+   if(!display_name)throw Error("Isi nama tampilan.");
+   const {data,error}=await db.auth.signUp({email,password,options:{data:{display_name}}});if(error)throw error;
+   if(data.session){await activateSession(data.user);toast("Akun berhasil dibuat!")}
+   else{showAuthMessage("Pendaftaran diterima. Verifikasi email, lalu kembali ke sini dan masuk dengan email serta password.");return}
+  } else {
+   const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw error;
+   await activateSession(data.user);
+  }
+ }catch(err){showAuthMessage(err.message||"Terjadi kesalahan.",true)}finally{$("authSubmit").disabled=false}
+});
 $("logoutBtn").onclick=async()=>{await db.auth.signOut();location.reload()};
 function renderMaterials(target,level="SD",subject="Semua"){const list=materials.filter(m=>(m[3]===level)&&(subject==="Semua"||m[0]===subject));$(target).innerHTML=list.map(m=>`<article class="material-card"><span class="emoji">${m[1]}</span><h3>${esc(m[0])}</h3><p>${esc(m[2])}</p><span class="tag">${m[3]}</span></article>`).join("")||'<p class="muted">Belum ada materi untuk pilihan ini.</p>'}
 function showPage(page){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$("page-"+page).classList.remove("hidden");document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.page===page));if(page==="friends")loadFriends();if(page==="chat")loadChatContacts()}
@@ -31,7 +40,26 @@ document.querySelectorAll(".level-card").forEach(n=>n.onclick=()=>{$("levelFilte
 $("levelFilter").onchange=()=>renderMaterials("materialsList",$("levelFilter").value,$("subjectFilter").value);
 $("subjectFilter").onchange=()=>renderMaterials("materialsList",$("levelFilter").value,$("subjectFilter").value);
 function showApp(){ $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("headerUser").classList.remove("hidden");$("headerName").textContent=profile?.display_name||"Pelajar";$("welcomeName").textContent=profile?.display_name||"Pelajar";$("profileUsername").value=profile?.username||"";$("profileDisplay").value=profile?.display_name||"";$("profileBio").value=profile?.bio||"";$("profileAvatar").textContent=(profile?.display_name||"P").slice(0,1).toUpperCase();renderMaterials("homeMaterials","SD");renderMaterials("materialsList","SD")}
-async function loadProfile(){const {data,error}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();if(error)throw error;if(!data)throw Error("Profil belum tersedia. Coba keluar lalu masuk kembali.");profile=data;showApp()}
+async function loadProfile(){
+ let {data,error}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
+ if(error)throw error;
+ if(!data){
+  const display_name=currentUser.user_metadata?.display_name||currentUser.email?.split("@")[0]||"Pelajar";
+  const username="pelajar_"+currentUser.id.replace(/-/g,"").slice(0,10);
+  const created=await db.from("profiles").insert({id:currentUser.id,username,display_name,bio:""}).select("*").single();
+  if(created.error)throw created.error;data=created.data;
+ }
+ profile=data;showApp();
+}
+let profileActivation=null;
+async function activateSession(user){
+ if(!user)return;
+ if(currentUser?.id===user.id&&profile)return;
+ if(profileActivation)return profileActivation;
+ currentUser=user;
+ profileActivation=loadProfile().catch(err=>{showAuthMessage("Gagal memuat profil: "+(err.message||"kesalahan tidak diketahui"),true);throw err}).finally(()=>{profileActivation=null});
+ return profileActivation;
+}
 $("profileForm").onsubmit=async e=>{e.preventDefault();const display_name=$("profileDisplay").value.trim(),bio=$("profileBio").value.trim();const {error}=await db.from("profiles").update({display_name,bio}).eq("id",currentUser.id);if(error){$("profileMessage").textContent=error.message;return}profile={...profile,display_name,bio};$("headerName").textContent=display_name;$("welcomeName").textContent=display_name;$("profileAvatar").textContent=display_name.slice(0,1).toUpperCase();$("profileMessage").textContent="Profil berhasil disimpan."};
 async function loadFriends(){const {data,error}=await db.from("friendships").select("*").or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`);if(error){toast(error.message);return}const rows=data||[],incoming=rows.filter(r=>r.receiver_id===currentUser.id&&r.status==="pending"),accepted=rows.filter(r=>r.status==="accepted");$("friendCount").textContent=accepted.length;
  const ids=[...new Set(accepted.map(r=>r.sender_id===currentUser.id?r.receiver_id:r.sender_id).concat(incoming.map(r=>r.sender_id)))];let people={};if(ids.length){const p=await db.from("profiles").select("id,username,display_name").in("id",ids);(p.data||[]).forEach(x=>people[x.id]=x)}
@@ -47,5 +75,13 @@ async function loadMessages(){const {data,error}=await db.from("messages").selec
 $("chatForm").onsubmit=async e=>{e.preventDefault();const content=$("chatInput").value.trim();if(!content||!selectedFriend)return;const {error}=await db.from("messages").insert({sender_id:currentUser.id,receiver_id:selectedFriend,content});if(error){toast(error.message);return}$("chatInput").value="";loadMessages()};
 document.querySelectorAll(".quiz-options button").forEach(b=>b.onclick=()=>{const correct=b.dataset.answer==="96";$("quizFeedback").textContent=correct?"Benar! 12 × 8 = 96. Hebat!":"Belum tepat. Coba hitung 12 × 8 sekali lagi."; $("quizFeedback").style.color=correct?"#78f0c1":"#ffb2c0";$("nextQuiz").classList.remove("hidden");document.querySelectorAll(".quiz-options button").forEach(x=>x.disabled=true)});
 $("nextQuiz").onclick=()=>{document.querySelectorAll(".quiz-options button").forEach(x=>x.disabled=false);$("quizFeedback").textContent="";$("nextQuiz").classList.add("hidden")};
-async function boot(){const {data:{session}}=await db.auth.getSession();if(session){currentUser=session.user;try{await loadProfile()}catch(e){toast(e.message);await db.auth.signOut()}}db.auth.onAuthStateChange(async(_event,session)=>{if(session&&!currentUser){currentUser=session.user;try{await loadProfile()}catch(e){toast(e.message)}}else if(!session&&currentUser){currentUser=null;profile=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden");$("headerUser").classList.add("hidden")}})}
+async function boot(){
+ try{const {data:{session}}=await db.auth.getSession();if(session){await activateSession(session.user)}}
+ catch(e){showAuthMessage("Sesi ditemukan, tetapi profil gagal dimuat: "+(e.message||"silakan masuk kembali"),true)}
+ db.auth.onAuthStateChange((event,session)=>{
+  // Do not run Supabase queries inside this callback: it can wait on the auth lock.
+  if(session){setTimeout(()=>{if(!currentUser||currentUser.id!==session.user.id)activateSession(session.user).catch(()=>{})},0)}
+  else if(event==="SIGNED_OUT"){currentUser=null;profile=null;profileActivation=null;$("appView").classList.add("hidden");$("authView").classList.remove("hidden");$("headerUser").classList.add("hidden")}
+ });
+}
 boot();
