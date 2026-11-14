@@ -6,13 +6,65 @@ const db = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let currentUser = null, profile = null, authMode = "login", selectedFriend = null, realtimeChannel = null;
 const $ = id => document.getElementById(id);
-const materials = [
-  ["Matematika","🔢","Pola bilangan dan operasi hitung","SD"],["IPA","🌿","Mengenal ekosistem dan makhluk hidup","SD"],
-  ["Bahasa Indonesia","📚","Ide pokok dan teks deskripsi","SD"],["Matematika","📐","Perbandingan dan persentase","SMP"],
-  ["IPA","⚗️","Sistem tata surya dan energi","SMP"],["Informatika","💻","Algoritma dan berpikir komputasional","SMP"],
-  ["Matematika","📈","Fungsi dan persamaan kuadrat","SMA"],["Bahasa Inggris","🌍","Reading comprehension","SMA"],
-  ["Informatika","🧠","Dasar data dan pemrograman","SMA"]
+const curriculum = {
+ SD: {
+  "Matematika":["Bilangan dan operasi hitung","Pecahan dalam kehidupan","Pengukuran dan bangun datar","Keliling dan luas","Pola bilangan","Data sederhana"],
+  "Bahasa Indonesia":["Ide pokok dan informasi penting","Teks deskripsi","Cerita dan unsur cerita","Puisi anak","Petunjuk dan prosedur","Menyampaikan pendapat"],
+  "IPAS":["Tubuh dan kesehatan","Makhluk hidup dan habitat","Ekosistem dan rantai makanan","Wujud dan perubahan benda","Gaya dan energi","Bumi dan lingkungan"],
+  "Pendidikan Pancasila":["Nilai-nilai Pancasila","Aturan dan tanggung jawab","Hak dan kewajiban","Hidup rukun dalam keberagaman","Musyawarah","Cinta lingkungan"],
+  "Bahasa Inggris":["Greetings and introductions","Numbers, days, and time","Things around us","Family and friends","Daily activities","Simple descriptions"],
+  "Seni Budaya":["Unsur seni rupa","Warna dan komposisi","Pola irama","Mengenal alat musik","Gerak dan tari","Karya dari bahan sekitar"],
+  "PJOK":["Gerak dasar","Permainan bola besar","Permainan bola kecil","Kebugaran jasmani","Kesehatan diri","Keselamatan saat beraktivitas"],
+  "Informatika":["Mengenal perangkat digital","Berpikir komputasional","Urutan instruksi","Data dan informasi","Etika digital","Keamanan akun"],
+  "Pendidikan Agama dan Budi Pekerti":["Bersikap jujur dan amanah","Menghormati sesama","Syukur dan kepedulian","Disiplin dalam keseharian","Menjaga kebersihan","Berbuat baik di lingkungan"]
+ },
+ SMP: {
+  "Matematika":["Bilangan bulat dan pecahan","Perbandingan dan skala","Aljabar dasar","Persamaan linear","Bangun datar dan ruang","Statistika dan peluang"],
+  "Bahasa Indonesia":["Teks deskripsi dan laporan","Teks prosedur","Teks eksplanasi","Cerita fantasi dan cerpen","Puisi dan majas","Teks persuasi dan diskusi"],
+  "Bahasa Inggris":["Descriptive text","Recount text","Procedure text","Present and past tense","Expressions and conversations","Reading comprehension"],
+  "IPA":["Organisasi kehidupan","Zat dan perubahannya","Gerak dan gaya","Energi dan pesawat sederhana","Sistem tubuh manusia","Ekologi dan bumi"],
+  "IPS":["Interaksi sosial","Kegiatan ekonomi","Kondisi geografis Indonesia","Sejarah Nusantara","Mobilitas sosial","Perdagangan dan globalisasi"],
+  "Pendidikan Pancasila":["Pancasila sebagai dasar negara","Norma dan konstitusi","Bhinneka Tunggal Ika","Hak asasi dan kewajiban","Demokrasi dan musyawarah","Persatuan Indonesia"],
+  "Informatika":["Berpikir komputasional","Sistem komputer","Jaringan dan internet","Data dan representasi","Algoritma dan pemrograman","Dampak sosial informatika"],
+  "Pendidikan Agama dan Budi Pekerti":["Keimanan dan rasa syukur","Ibadah dan kedisiplinan","Akhlak dalam pergaulan","Toleransi dan kepedulian","Sejarah dan keteladanan","Menjaga alam"],
+  "PJOK":["Permainan bola besar","Permainan bola kecil","Atletik dasar","Kebugaran jasmani","Aktivitas ritmik","Pola hidup sehat"],
+  "Seni Budaya":["Menggambar dan desain","Ragam hias","Musik dan irama","Ansambel sederhana","Seni tari daerah","Apresiasi karya"],
+  "Prakarya":["Kerajinan bahan lunak","Kerajinan bahan keras","Budidaya sederhana","Pengolahan pangan","Rekayasa sederhana","Wirausaha kreatif"]
+ },
+ SMA: {
+  "Matematika": ["Persamaan dan pertidaksamaan","Fungsi dan grafik","Trigonometri","Limit fungsi","Turunan dan penerapan","Statistika dan peluang"],
+  "Bahasa Indonesia":["Teks laporan hasil observasi","Teks eksposisi dan argumentasi","Teks negosiasi","Cerita sejarah dan cerpen","Kritik dan esai","Karya ilmiah"],
+  "Bahasa Inggris":["Analytical exposition","Narrative and recount","Discussion text","Conditional sentences","Passive voice","Academic reading"],
+  "Fisika":["Pengukuran dan vektor","Gerak lurus dan melingkar","Hukum Newton","Usaha dan energi","Gelombang dan bunyi","Listrik dan magnet"],
+  "Kimia":["Struktur atom","Sistem periodik unsur","Ikatan kimia","Stoikiometri","Larutan dan asam basa","Reaksi redoks"],
+  "Biologi":["Keanekaragaman hayati","Struktur dan fungsi sel","Sistem organ manusia","Genetika dasar","Evolusi","Ekosistem dan perubahan lingkungan"],
+  "Ekonomi":["Konsep dasar ekonomi","Permintaan dan penawaran","Pasar dan harga","Lembaga keuangan","Kebijakan fiskal dan moneter","Akuntansi dasar"],
+  "Sejarah":["Konsep berpikir sejarah","Peradaban awal dunia","Kerajaan Nusantara","Kolonialisme dan perlawanan","Pergerakan nasional","Indonesia merdeka"],
+  "Geografi":["Konsep dan prinsip geografi","Peta dan penginderaan jauh","Dinamika litosfer","Atmosfer dan iklim","Kependudukan","Mitigasi bencana"],
+  "Sosiologi":["Individu dan masyarakat","Interaksi sosial","Nilai dan norma","Kelompok sosial","Konflik dan integrasi","Perubahan sosial"],
+  "Informatika":["Algoritma dan pemrograman","Struktur data","Basis data","Jaringan komputer","Keamanan dan privasi digital","Kecerdasan artifisial"],
+  "Pendidikan Pancasila":["Pancasila dalam kehidupan","Konstitusi dan UUD 1945","Demokrasi Indonesia","Hak dan kewajiban warga","Bhinneka Tunggal Ika","Tantangan kebangsaan"],
+  "PJOK":["Strategi permainan olahraga","Kebugaran dan latihan","Atletik dan keterampilan gerak","Aktivitas ritmik","Kesehatan remaja","Pencegahan cedera"],
+  "Seni Budaya":["Unsur dan prinsip seni rupa","Desain dan karya visual","Musik dan komposisi","Seni tari dan ekspresi","Teater dan pertunjukan","Kritik dan apresiasi seni"],
+  "Prakarya dan Kewirausahaan":["Peluang usaha","Riset kebutuhan pengguna","Perencanaan produk","Produksi dan kualitas","Pemasaran digital","Evaluasi usaha"]
+ }
+};
+const levels = Object.keys(curriculum);
+let selectedSubject = "", selectedLevel = "SD", selectedChapter = 0, selectedMode = "seru";
+const lessonQuestions = [
+ {q:"Apa gagasan utama yang paling penting dari materi ini?",a:["Konsep inti yang dijelaskan","Contoh yang tidak berkaitan","Informasi tambahan yang tidak dibahas"],correct:0},
+ {q:"Mengapa konsep ini berguna dalam kehidupan atau pelajaran berikutnya?",a:["Tidak memiliki kegunaan","Membantu memahami dan menerapkan konsep","Hanya untuk dihafalkan"],correct:1}
 ];
+function makeChapters(level,subject){return curriculum[level][subject].map((title,i)=>({title,content:`Pada bab ${i+1}, kita mempelajari ${title.toLowerCase()}. Mulailah dengan memahami pengertian dan tujuan pembahasannya. Perhatikan istilah penting, hubungan antar gagasan, serta contoh yang diberikan guru atau buku pelajaran.`,points:[`Kenali pengertian utama dari ${title.toLowerCase()}.`,`Hubungkan konsep dengan contoh sederhana dalam kehidupan sehari-hari.`,`Catat satu hal yang masih ingin kamu tanyakan atau diskusikan.`],activity:`Tuliskan ringkasan tiga kalimat tentang ${title.toLowerCase()}, lalu ceritakan satu contoh yang kamu temukan.`}))}
+function renderMaterials(target,level="SD",subject="Semua"){
+ selectedLevel=level;const names=Object.keys(curriculum[level]||{}).filter(n=>subject==="Semua"||n===subject);
+ $(target).innerHTML=names.map(name=>`<article class="material-card"><span class="subject-index">${String(Object.keys(curriculum[level]).indexOf(name)+1).padStart(2,"0")}</span><h3>${esc(name)}</h3><p>${curriculum[level][name].length} bab pembelajaran tersedia untuk jenjang ${level}.</p><button class="button button-secondary" data-subject="${esc(name)}" data-level="${level}">Belajar materi ini</button></article>`).join("");
+ $(target).querySelectorAll("[data-subject]").forEach(b=>b.onclick=()=>openSubject(b.dataset.level,b.dataset.subject));
+}
+function openSubject(level,subject){selectedLevel=level;selectedSubject=subject;const chapters=makeChapters(level,subject);$("subjectHeading").textContent=subject;$("subjectIntro").textContent=`${level} · ${chapters.length} bab tersedia. Pilih bab yang ingin kamu pelajari.`;$("chapterList").innerHTML=chapters.map((c,i)=>`<button class="chapter-row" data-chapter="${i}"><span class="chapter-number">BAB ${String(i+1).padStart(2,"0")}</span><span class="chapter-name">${esc(c.title)}</span><span class="chapter-arrow">Buka</span></button>`).join("");$("chapterList").querySelectorAll("[data-chapter]").forEach(b=>b.onclick=()=>openLesson(Number(b.dataset.chapter)));showPage("subject")}
+function openLesson(index){selectedChapter=index;const c=makeChapters(selectedLevel,selectedSubject)[index];$("lessonHeading").textContent=c.title;$("lessonBreadcrumb").textContent=`${selectedLevel} / ${selectedSubject} / Bab ${index+1}`;$("lessonContent").innerHTML=`<p>${esc(c.content)}</p><h3>Hal penting untuk diingat</h3><ul>${c.points.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="activity-note"><b>Aktivitas singkat</b><p>${esc(c.activity)}</p></div>`;$("modeSeru").classList.toggle("selected",selectedMode==="seru");$("modeSantai").classList.toggle("selected",selectedMode==="santai");$("modeTeman").classList.toggle("selected",selectedMode==="teman");$("lessonModeInfo").textContent=selectedMode==="seru"?"Belajar aktif: baca bagian penting, lalu buat contoh sendiri.":selectedMode==="santai"?"Belajar santai: baca perlahan, berhenti sejenak, lalu tulis ringkasan dengan bahasamu sendiri.":"Belajar bersama: ajak teman yang kamu kenal, baca bergantian, lalu kerjakan soal masing-masing dan diskusikan alasannya.";$("questionArea").classList.add("hidden");showPage("lesson")}
+function showQuestions(){const title=makeChapters(selectedLevel,selectedSubject)[selectedChapter].title;const qs=[{q:`Apa fokus utama yang dipelajari dalam bab "${title}"?`,a:[title,"Topik yang tidak berkaitan","Hanya menghafal istilah tanpa memahami"],correct:0},{q:`Cara belajar mana yang paling membantu memahami "${title}"?`,a:["Melewati bacaan dan langsung menebak","Memahami konsep, melihat contoh, lalu mencoba latihan","Menghafal judul tanpa membaca isi"],correct:1}];$("questionArea").classList.remove("hidden");$("questionArea").innerHTML=`<h2>Latihan setelah membaca</h2><p class="muted">Dua soal disediakan: soal pertama untuk kamu dan soal kedua untuk teman belajarmu.</p>${qs.map((q,i)=>`<div class="question-card"><span class="tag">${i===0?"SOAL KAMU":"SOAL TEMAN"}</span><h3>${esc(q.q)}</h3><div class="answer-options">${q.a.map((a,j)=>`<button data-q="${i}" data-a="${j}">${esc(a)}</button>`).join("")}</div><p class="answer-feedback" id="feedback${i}"></p></div>`).join("")}<p class="muted">Jika belajar bersama, minta teman memilih jawabannya sendiri. Diskusikan alasan setelah keduanya menjawab.</p>`;$("questionArea").querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{const q=Number(b.dataset.q),correct=qs[q].correct;const all=$("questionArea").querySelectorAll(`[data-q="${q}"]`);all.forEach(x=>x.disabled=true);$("feedback"+q).textContent=Number(b.dataset.a)===correct?"Jawaban tepat. Bagus, lanjutkan!":"Belum tepat. Baca kembali materi dan diskusikan alasannya.";$("feedback"+q).classList.toggle("correct",Number(b.dataset.a)===correct)})}
+
 function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function showAuthMessage(msg,error=false){$("authMessage").textContent=msg;$("authMessage").style.color=error?"#ff9baf":"#78f0c1"}
@@ -32,13 +84,14 @@ $("authForm").addEventListener("submit",async e=>{e.preventDefault();const email
  }catch(err){showAuthMessage(err.message||"Terjadi kesalahan.",true)}finally{$("authSubmit").disabled=false}
 });
 $("logoutBtn").onclick=async()=>{await db.auth.signOut();location.reload()};
-function renderMaterials(target,level="SD",subject="Semua"){const list=materials.filter(m=>(m[3]===level)&&(subject==="Semua"||m[0]===subject));$(target).innerHTML=list.map(m=>`<article class="material-card"><span class="emoji">${m[1]}</span><h3>${esc(m[0])}</h3><p>${esc(m[2])}</p><span class="tag">${m[3]}</span></article>`).join("")||'<p class="muted">Belum ada materi untuk pilihan ini.</p>'}
 function showPage(page){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$("page-"+page).classList.remove("hidden");document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.page===page));if(page==="friends")loadFriends();if(page==="chat")loadChatContacts()}
 document.querySelectorAll(".nav-item").forEach(n=>n.onclick=()=>showPage(n.dataset.page));
 document.querySelectorAll("[data-goto]").forEach(n=>n.onclick=()=>showPage(n.dataset.goto));
-document.querySelectorAll(".level-card").forEach(n=>n.onclick=()=>{$("levelFilter").value=n.dataset.level;showPage("materials");renderMaterials("materialsList",n.dataset.level,$("subjectFilter").value)});
-$("levelFilter").onchange=()=>renderMaterials("materialsList",$("levelFilter").value,$("subjectFilter").value);
-$("subjectFilter").onchange=()=>renderMaterials("materialsList",$("levelFilter").value,$("subjectFilter").value);
+document.querySelectorAll(".level-card").forEach(n=>n.onclick=()=>{$("levelFilter").value=n.dataset.level;showPage("materials");renderMaterials("materialsList",n.dataset.level)});
+$("levelFilter").onchange=()=>renderMaterials("materialsList",$("levelFilter").value);
+$("backToCatalog").onclick=()=>showPage("materials");$("backToSubject").onclick=()=>openSubject(selectedLevel,selectedSubject);
+["modeSeru","modeSantai","modeTeman"].forEach(id=>$(id).onclick=()=>{selectedMode=id==="modeSeru"?"seru":id==="modeSantai"?"santai":"teman";openLesson(selectedChapter)});
+$("startQuestions").onclick=showQuestions;
 function showApp(){ $("authView").classList.add("hidden");$("appView").classList.remove("hidden");$("headerUser").classList.remove("hidden");$("headerName").textContent=profile?.display_name||"Pelajar";$("welcomeName").textContent=profile?.display_name||"Pelajar";$("profileUsername").value=profile?.username||"";$("profileDisplay").value=profile?.display_name||"";$("profileBio").value=profile?.bio||"";$("profileAvatar").textContent=(profile?.display_name||"P").slice(0,1).toUpperCase();renderMaterials("homeMaterials","SD");renderMaterials("materialsList","SD")}
 async function loadProfile(){
  let {data,error}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();

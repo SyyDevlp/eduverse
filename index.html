@@ -12,7 +12,7 @@
 <body>
   <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
   <header class="topbar">
-    <a class="brand" href="#"><span class="brand-mark">E</span><span>EDU<span class="brand-accent">VERSE</span><small>LEARN • CONNECT • GROW</small></span></a>
+    <a class="brand" href="#"><span class="brand-mark">E</span><span>EDU<span class="brand-accent">VERSE</span><small>LEARN · CONNECT · GROW</small></span></a>
     <div id="headerUser" class="header-user hidden"><span id="headerName"></span><button id="logoutBtn" class="button button-quiet">Keluar</button></div>
   </header>
 
@@ -22,7 +22,7 @@
         <div class="eyebrow"><span class="pulse"></span> RUANG BELAJAR DIGITAL</div>
         <h1>Belajar lebih jauh.<br><span class="gradient-text">Tumbuh bersama.</span></h1>
         <p>Tempat belajar, berlatih, dan terhubung dengan teman dalam satu ruang yang positif.</p>
-        <div class="hero-points"><span>✦ Materi SD • SMP • SMA</span><span>✦ Kuis dan progres</span><span>✦ Komunitas belajar</span></div>
+        <div class="hero-points"><span> Materi SD · SMP · SMA</span><span> Kuis dan progres</span><span> Komunitas belajar</span></div>
       </div>
       <div class="auth-card glass">
         <div class="auth-tabs"><button id="loginTab" class="tab active">Masuk</button><button id="signupTab" class="tab">Daftar</button></div>
@@ -41,34 +41,41 @@
     <section id="appView" class="app-layout hidden">
       <aside class="sidebar glass">
         <div class="side-label">MENU UTAMA</div>
-        <button class="nav-item active" data-page="home"><span>⌂</span> Ringkasan</button>
-        <button class="nav-item" data-page="materials"><span>▤</span> Materi belajar</button>
-        <button class="nav-item" data-page="quiz"><span>✎</span> Kuis latihan</button>
-        <button class="nav-item" data-page="friends"><span>♧</span> Teman</button>
-        <button class="nav-item" data-page="chat"><span>◌</span> Chat</button>
-        <button class="nav-item" data-page="profile"><span>◎</span> Profil</button>
+        <button class="nav-item active" data-page="home"><span></span> Ringkasan</button>
+        <button class="nav-item" data-page="materials"><span></span> Materi belajar</button>
+        <button class="nav-item" data-page="quiz"><span></span> Kuis latihan</button>
+        <button class="nav-item" data-page="friends"><span></span> Teman</button>
+        <button class="nav-item" data-page="chat"><span></span> Chat</button>
+        <button class="nav-item" data-page="profile"><span></span> Profil</button>
         <div class="sidebar-note"><b>Belajar dengan aman</b><p>Jaga privasi dan bersikap baik kepada sesama pelajar.</p></div>
       </aside>
 
       <div class="content">
         <section id="page-home" class="page">
-          <div class="welcome-row"><div><div class="eyebrow">DASHBOARD PELAJAR</div><h1>Halo, <span id="welcomeName">Pelajar</span>! <span class="wave">✦</span></h1><p class="muted">Satu langkah kecil hari ini membawa kemajuan.</p></div><div class="date-chip">✧ EDUVERSE</div></div>
-          <div class="stat-grid"><article class="stat-card glass"><span class="stat-icon">▤</span><b>Materi</b><strong>6</strong><small class="muted">Mata pelajaran</small></article><article class="stat-card glass"><span class="stat-icon">✎</span><b>Kuis</b><strong>Siap</strong><small class="muted">Latihan mandiri</small></article><article class="stat-card glass"><span class="stat-icon">♧</span><b>Komunitas</b><strong id="friendCount">0</strong><small class="muted">Teman terhubung</small></article></div>
+          <div class="welcome-row"><div><div class="eyebrow">DASHBOARD PELAJAR</div><h1>Halo, <span id="welcomeName">Pelajar</span>! <span class="wave"></span></h1><p class="muted">Satu langkah kecil hari ini membawa kemajuan.</p></div><div class="date-chip"> EDUVERSE</div></div>
+          <div class="stat-grid"><article class="stat-card glass"><span class="stat-icon"></span><b>Materi</b><strong>9+</strong><small class="muted">Mata pelajaran SD</small></article><article class="stat-card glass"><span class="stat-icon"></span><b>Kuis</b><strong>Siap</strong><small class="muted">Latihan mandiri</small></article><article class="stat-card glass"><span class="stat-icon"></span><b>Komunitas</b><strong id="friendCount">0</strong><small class="muted">Teman terhubung</small></article></div>
           <div class="section-heading"><div><div class="eyebrow">MULAI BELAJAR</div><h2>Pilih perjalananmu</h2></div></div>
-          <div class="level-grid"><button class="level-card" data-level="SD"><span>🌱</span><b>SD</b><small>Bangun fondasi</small></button><button class="level-card" data-level="SMP"><span>🚀</span><b>SMP</b><small>Jelajahi ide</small></button><button class="level-card" data-level="SMA"><span>🌌</span><b>SMA</b><small>Asah potensimu</small></button></div>
-          <div class="section-heading"><div><div class="eyebrow">PILIHAN HARI INI</div><h2>Ruang belajar</h2></div><button class="text-button" data-goto="materials">Lihat semua →</button></div>
+          <div class="level-grid"><button class="level-card" data-level="SD"><span></span><b>SD</b><small>Bangun fondasi</small></button><button class="level-card" data-level="SMP"><span></span><b>SMP</b><small>Jelajahi ide</small></button><button class="level-card" data-level="SMA"><span></span><b>SMA</b><small>Asah potensimu</small></button></div>
+          <div class="section-heading"><div><div class="eyebrow">PILIHAN HARI INI</div><h2>Ruang belajar</h2></div><button class="text-button" data-goto="materials">Lihat semua ›</button></div>
           <div id="homeMaterials" class="material-grid"></div>
         </section>
 
         <section id="page-materials" class="page hidden">
-          <div class="eyebrow">PERPUSTAKAAN DIGITAL</div><h1>Materi belajar</h1><p class="muted">Pilih jenjang dan mata pelajaran untuk mulai belajar.</p>
-          <div class="filter-row"><select id="levelFilter"><option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA">SMA</option></select><select id="subjectFilter"><option value="Semua">Semua pelajaran</option><option>Matematika</option><option>IPA</option><option>Bahasa Indonesia</option><option>Bahasa Inggris</option><option>IPS</option><option>Informatika</option></select></div>
+          <div class="eyebrow">PERPUSTAKAAN DIGITAL</div><h1>Materi belajar</h1><p class="muted">Pilih jenjang, lalu pilih mata pelajaran yang ingin kamu pelajari.</p>
+          <div class="filter-row"><select id="levelFilter"><option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA">SMA</option></select></div>
           <div id="materialsList" class="material-grid"></div>
         </section>
-
+        <section id="page-subject" class="page hidden">
+          <button id="backToCatalog" class="button button-quiet">Kembali ke mata pelajaran</button><div class="eyebrow">DAFTAR BAB</div><h1 id="subjectHeading">Mata pelajaran</h1><p id="subjectIntro" class="muted"></p><div id="chapterList" class="chapter-list"></div>
+        </section>
+        <section id="page-lesson" class="page hidden">
+          <button id="backToSubject" class="button button-quiet">Kembali ke daftar bab</button><p id="lessonBreadcrumb" class="eyebrow"></p><h1 id="lessonHeading">Judul bab</h1>
+          <div class="lesson-layout"><article id="lessonContent" class="lesson-content glass"></article><aside class="study-mode glass"><h2>Pilih cara belajar</h2><button id="modeSeru" class="mode-button">Belajar dengan seru</button><button id="modeSantai" class="mode-button">Belajar dengan santai</button><button id="modeTeman" class="mode-button">Belajar dengan teman</button><p id="lessonModeInfo" class="muted"></p><button id="startQuestions" class="button button-primary full">Selesai membaca, kerjakan 2 soal</button></aside></div>
+          <div id="questionArea" class="question-area hidden"></div>
+        </section>
         <section id="page-quiz" class="page hidden">
           <div class="eyebrow">LATIHAN MANDIRI</div><h1>Kuis singkat</h1><p class="muted">Coba jawab pertanyaan berikut. Ini latihan, bukan penilaian resmi.</p>
-          <div class="quiz-card glass"><span class="tag">MATEMATIKA • SMP</span><h2>Berapakah hasil dari 12 × 8?</h2><div id="quizOptions" class="quiz-options"><button data-answer="96">96</button><button data-answer="86">86</button><button data-answer="108">108</button><button data-answer="92">92</button></div><p id="quizFeedback" class="message"></p><button id="nextQuiz" class="button button-secondary hidden">Coba lagi</button></div>
+          <div class="quiz-card glass"><span class="tag">MATEMATIKA · SMP</span><h2>Berapakah hasil dari 12 × 8?</h2><div id="quizOptions" class="quiz-options"><button data-answer="96">96</button><button data-answer="86">86</button><button data-answer="108">108</button><button data-answer="92">92</button></div><p id="quizFeedback" class="message"></p><button id="nextQuiz" class="button button-secondary hidden">Coba lagi</button></div>
         </section>
 
         <section id="page-friends" class="page hidden">
@@ -88,7 +95,7 @@
       </div>
     </section>
   </main>
-  <footer>EDUVERSE <span>•</span> Belajar, terhubung, dan berkembang dengan aman.</footer>
+  <footer>EDUVERSE <span>·</span> Belajar, terhubung, dan berkembang dengan aman.</footer>
   <div id="toast" class="toast" role="status"></div>
 </body>
 </html>
